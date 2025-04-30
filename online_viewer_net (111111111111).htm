@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>نتيجة الثانوية العامة 🎓</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #ecf0f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      direction: rtl;
+      margin: 0;
+    }
+
+    .container {
+      background-color: white;
+      border: 2px solid #000;
+      border-radius: 15px;
+      width: 420px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 22px;
+      color: #2c3e50;
+    }
+
+    .line {
+      border-bottom: 1px dashed #aaa;
+      margin: 10px 0 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .result-card {
+      margin-top: 25px;
+      border: 2px solid #444;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #fdfdfd;
+      text-align: right;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #444;
+      margin: 5px 0;
+    }
+
+    .value {
+      font-size: 18px;
+      color: #000;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      font-size: 20px;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .share-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .share-buttons button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .print-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+    }
+
+    .whatsapp-btn {
+      background: #25d366;
+      color: white;
+      border: none;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      color: #34495e;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>وزارة التربية والتعليم</h1>
+    <div class="line"></div>
+    <p>ادخل اسمك لتظهر نتيجتك التفصيلية 👇</p>
+    <input type="text" id="nameInput" placeholder="اسم الطالب">
+    <br>
+    <button onclick="showResult()">عرض النتيجة</button>
+
+    <div id="resultBox" class="result-card" style="display:none;">
+      <div class="label">الاسم:</div>
+      <div id="studentName" class="value"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>المادة</th>
+            <th>الدرجة</th>
+            <th>من</th>
+          </tr>
+        </thead>
+        <tbody id="marksTable"></tbody>
+      </table>
+
+      <div class="label">المجموع الكلي:</div>
+      <div id="total" class="value"></div>
+
+      <div class="label">النسبة المئوية:</div>
+      <div id="percentage" class="value"></div>
+
+      <div id="status" class="status"></div>
+
+      <div class="share-buttons">
+        <button class="print-btn" onclick="window.print()">🖨️ طباعة النتيجة</button>
+        <button class="whatsapp-btn" onclick="shareWhatsApp()">📤 مشاركة واتساب</button>
+        <button onclick="showCollege()" style="background:#9b59b6; color:white;">🎯 الكلية المتوقعة</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="collegeModal" style="display:none; position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(0,0,0,0.6); justify-content: center; align-items: center;">
+    <div style="background: white; padding: 20px; border-radius: 10px; max-width: 350px; text-align: center; margin: auto;">
+      <h3>🎓 الكلية المتوقعة</h3>
+      <p id="collegeText" style="font-size: 18px; margin-top: 15px;"></p>
+      <button onclick="closeCollege()" style="margin-top: 20px; background: #e74c3c; color: white; padding: 8px 15px; border: none; border-radius: 6px;">إغلاق</button>
+    </div>
+  </div>
+
+  <script>
+    function showResult() {
+      const name = document.getElementById("nameInput").value.trim();
+      if (name === "") {
+        alert("رجاءً اكتب اسمك أولاً.");
+        return;
+      }
+
+      const subjects = [
+        { name: "اللغة العربية", max: 80 },
+        { name: "اللغة الإنجليزية", max: 60 },
+        { name: "الفيزياء", max: 60 },
+        { name: "الكيمياء", max: 60 },
+        { name: "الرياضيات", max: 60 }
+      ];
+
+      let totalScore = 0;
+      let totalMax = 0;
+      let tableHTML = "";
+
+      subjects.forEach(subject => {
+        const score = Math.floor(Math.random() * (subject.max - 30 + 1)) + 30;
+        totalScore += score;
+        totalMax += subject.max;
+        tableHTML += `
+          <tr>
+            <td>${subject.name}</td>
+            <td>${score}</td>
+            <td>${subject.max}</td>
+          </tr>
+        `;
+      });
+
+      const percentage = ((totalScore / totalMax) * 100).toFixed(2);
+      const statusText = percentage >= 60 ? "🎉 ناجح" : "😢 راسب";
+
+      document.getElementById("studentName").textContent = name;
+      document.getElementById("marksTable").innerHTML = tableHTML;
+      document.getElementById("total").textContent = `${totalScore} من ${totalMax}`;
+      document.getElementById("percentage").textContent = `${percentage} ٪`;
+      document.getElementById("status").textContent = statusText;
+      document.getElementById("status").style.color = percentage >= 60 ? "green" : "red";
+
+      document.getElementById("resultBox").style.display = "block";
+    }
+
+    function shareWhatsApp() {
+      const name = document.getElementById("studentName").textContent;
+      const percentage = document.getElementById("percentage").textContent;
+      const status = document.getElementById("status").textContent;
+      const msg = `📄 نتيجة الطالب: ${name}\nالنسبة: ${percentage}\nالحالة: ${status}\nجرب تطلع نتيجتك هنا:`;
+      const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
+
+    function showCollege() {
+      const percentage = parseFloat(document.getElementById("percentage").textContent);
+      let college = "";
+
+      if (percentage >= 90) {
+        college = "كلية هندسة 🔧";
+      } else if (percentage >= 80) {
+        college = "كلية حاسبات ومعلومات 💻";
+      } else {
+        const funnyColleges = [
+          "معهد تدليك أزبرة 😂",
+          "معهد زراعة بامية بجنوب الوادي 🫘",
+          "كلية حلب جواميس قسم خراطيم 🐃",
+          "كلية تزغيط كتاكيت جامعة الفيوم 🐥",
+          "كلية دعك البضان بالأقصر 🤯",
+          "جامعة تعالى بليل 🌚"
+        ];
+        const randomIndex = Math.floor(Math.random() * funnyColleges.length);
+        college = funnyColleges[randomIndex];
+      }
+
+      document.getElementById("collegeText").textContent = college;
+      document.getElementById("collegeModal").style.display = "flex";
+    }
+
+    function closeCollege() {
+      document.getElementById("collegeModal").style.display = "none";
+    }
+  </script>
+
+  <div class="footer">
+    Powered by Mostafa Ahmed
+  </div>
+
+</body>
+</html>
